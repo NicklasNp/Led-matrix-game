@@ -1,0 +1,376 @@
+//Pin connected to ST_CP of 74HC595
+int latchPin = 8;
+//Pin connected to SH_CP of 74HC595
+int clockPin = 12;
+////Pin connected to DS of 74HC595
+int dataPin = 11;
+//Declare shiftregisters pins
+
+int colpin1 = 2;
+int colpin2 = 3;
+int colpin3 = 4;
+int colpin4 = 5;
+//Declare Pins for colums
+
+int buttonRight = 7;
+int buttonLeft = 6;
+int buttonUp = 9;
+int buttonDown = 10;
+//Declare input pin for buttons
+
+boolean gameover = false;
+boolean keepmoving = true;
+
+int delint=5;
+int greenPos = 2;
+int litredled;
+int previousMillis;
+int timelaps;
+//Declare global variables
+
+void setup() {
+  pinMode(latchPin, OUTPUT);
+  pinMode(clockPin, OUTPUT);
+  pinMode(dataPin, OUTPUT);
+  //set pins to output so you can control the shift register
+
+  pinMode(colpin1, OUTPUT);
+  pinMode(colpin2, OUTPUT);
+  pinMode(colpin3, OUTPUT);
+  pinMode(colpin4, OUTPUT);
+  //Declare colums as output
+  
+  pinMode(buttonRight, INPUT_PULLUP);
+  pinMode(buttonLeft, INPUT_PULLUP);
+  pinMode(buttonUp, INPUT_PULLUP);
+  pinMode(buttonDown, INPUT_PULLUP);
+  //Make button pullup
+
+  Serial.begin(9600);
+}
+
+void loop() {
+  int interval = 7000;
+
+  while (!gameover)
+  {
+    randomSeed(analogRead(A0));
+    litredled = random(0,15);
+    lightredled(litredled);
+    delay(400);
+    //Light a red led as target
+    
+    while (keepmoving)
+    {
+      
+      if ((millis() - previousMillis) > (interval-timelaps))
+      {
+        keepmoving = false;
+        
+          for (int i=0;i<16;i++)
+          {
+            lightredled(i);
+             
+            delay(100);
+          }  
+        
+        gameover = true;
+      }//Check he target was cought within the interval
+
+      readbuttons();
+      lightgreenled(greenPos);
+      //Check buttons and light a green as a steerled
+
+      if (greenPos == litredled)
+      {
+        //Could add points to score somehow
+        //Perhaps some sort of celebratory sound
+        lightgreenled(greenPos);
+        delay(100);
+        lightredled(litredled);
+        delay(100);
+        
+        timelaps = timelaps + 300;
+        //add time to timelaps wich makes interval 0,3s shorter
+        
+        keepmoving = false;
+      }
+//      Serial.print(greenPos);
+//      Serial.print(litredled);
+//Uncomment if serial print is neccesary
+      Serial.println(timelaps); 
+    }//keepmoving
+    previousMillis  = millis();
+    keepmoving = true;
+  }//gameover
+}//loop
+
+void lightgreenled(int x_){
+  digitalWrite(latchPin, LOW);
+  switch (x_) {
+  case 0:
+    digitalWrite(colpin1, HIGH);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 1:
+    digitalWrite(colpin1, HIGH);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 2:
+    digitalWrite(colpin1, HIGH);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 3:
+    digitalWrite(colpin1, HIGH);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 4:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, HIGH);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 5:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, HIGH);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 6:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, HIGH);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 7:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, HIGH);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 8:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, HIGH);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 9:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, HIGH);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 10:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, HIGH);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 11:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, HIGH);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 12:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, HIGH);
+    break;
+  case 13:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, HIGH);
+    break;
+  case 14:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, HIGH);
+    break;
+  case 15:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, HIGH);
+    break;
+  }
+  delay(delint);
+
+  digitalWrite(latchPin, LOW);
+
+  if (x_ % 4 == 0){
+    shiftOut(dataPin, clockPin, MSBFIRST, B11101111);
+  }
+  //1st Row
+  else if (x_%4==1){
+    shiftOut(dataPin, clockPin, MSBFIRST, B11011111);
+  }
+  //2nd Row
+  else if (x_%4==2){
+    shiftOut(dataPin, clockPin, MSBFIRST, B10111111);
+  }
+  //3rd Row
+  else if (x_ % 4 == 3){
+    shiftOut(dataPin, clockPin, MSBFIRST, B01111111);
+  }
+  //4th Row
+
+  delay(delint);
+
+  digitalWrite(latchPin, HIGH);
+}//lightgreenled
+
+void lightredled(int x){
+digitalWrite(latchPin, LOW);
+  switch (x) {
+  case 0:
+    digitalWrite(colpin1, HIGH);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 1:
+    digitalWrite(colpin1, HIGH);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 2:
+    digitalWrite(colpin1, HIGH);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 3:
+    digitalWrite(colpin1, HIGH);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 4:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, HIGH);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 5:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, HIGH);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 6:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, HIGH);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 7:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, HIGH);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 8:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, HIGH);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 9:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, HIGH);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 10:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, HIGH);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 11:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, HIGH);
+    digitalWrite(colpin4, LOW);
+    break;
+  case 12:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, HIGH);
+    break;
+  case 13:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, HIGH);
+    break;
+  case 14:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, HIGH);
+    break;
+  case 15:
+    digitalWrite(colpin1, LOW);
+    digitalWrite(colpin2, LOW);
+    digitalWrite(colpin3, LOW);
+    digitalWrite(colpin4, HIGH);
+    break;
+  }
+  delay(delint); 
+
+  digitalWrite(latchPin, LOW);
+
+  if (x % 4 == 0){
+    shiftOut(dataPin, clockPin, MSBFIRST, B11111110);
+  }
+  //1st Row
+  else if (x%4==1){
+    shiftOut(dataPin, clockPin, MSBFIRST, B11111101);
+  }
+  //2nd Row
+  else if (x%4==2){
+    shiftOut(dataPin, clockPin, MSBFIRST, B11111011);
+  }
+  //3rd Row
+  else if (x % 4 == 3){
+    shiftOut(dataPin, clockPin, MSBFIRST, B11110111);
+  }
+  //4th Row
+
+  delay(delint);
+  digitalWrite(latchPin, HIGH);
+}//lightredled
+
+void readbuttons(){
+  if (digitalRead(buttonRight) == LOW && (greenPos <12)){
+    greenPos = greenPos + 4;
+    while(digitalRead(buttonRight) == LOW){};
+  }
+  if (digitalRead(buttonLeft) == LOW && (greenPos >=4)){
+    greenPos = greenPos - 4;
+    while (digitalRead(buttonLeft) == LOW){};
+  }
+  if ((digitalRead(buttonDown) == LOW && (greenPos % 4 != 0))){
+    greenPos = greenPos - 1;
+    while (digitalRead(buttonDown) == LOW){};
+  }
+  if ((digitalRead(buttonUp) == LOW && (greenPos % 4 != 3))){
+    greenPos = greenPos + 1;
+    while (digitalRead(buttonUp) == LOW){};
+  }
+}//readbuttons
